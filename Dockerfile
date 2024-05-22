@@ -1,15 +1,14 @@
-# Stage 1
-FROM node:16.14 as react-build
+FROM node:16.14 as build
 WORKDIR /app
 COPY . ./
 RUN npm install
-#RUN npm audit fix --force
-RUN npx vite build
-
-
-# Stage 2 - the production environment
+RUN npm run build --outDir /app/build
+# Stage 2 - Production Environment
 FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/build .
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=react-build /app/build /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
+
+
